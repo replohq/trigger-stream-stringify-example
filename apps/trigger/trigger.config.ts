@@ -1,7 +1,7 @@
 import { defineConfig } from "@trigger.dev/sdk/v3";
 
 export default defineConfig({
-  project: "trigger-stream-stringify-example",
+  project: "proj_ufnhkruhrtdpekbczhzm",
   runtime: "node",
   logLevel: "log",
   retries: {

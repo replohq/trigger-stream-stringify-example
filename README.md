@@ -40,9 +40,9 @@ Then parse it in the `messageStream.read()` call.
    ```
 
 2. **Start the server**
-
+   Find the TRIGGER_SECRET_KEY for your project, then:
    ```bash
-   pnpm dev
+   TRIGGER_SECRET_KEY=... pnpm dev
    ```
 
 3. **Open http://localhost:3000 and click "Start Stream"**

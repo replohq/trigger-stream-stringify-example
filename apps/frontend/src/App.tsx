@@ -11,6 +11,8 @@ function App() {
   const [runId, setRunId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  console.log("messages", messages);
+
   const startStream = async () => {
     setMessages([]);
     setError(null);
@@ -28,7 +30,9 @@ function App() {
       // Step 2: Subscribe to the stream
       const streamRes = await fetch(`/api/subscribe-stream/${newRunId}`);
       if (!streamRes.ok) {
-        throw new Error(`Failed to subscribe to stream: ${streamRes.statusText}`);
+        throw new Error(
+          `Failed to subscribe to stream: ${streamRes.statusText}`
+        );
       }
 
       const reader = streamRes.body?.getReader();
@@ -79,7 +83,9 @@ function App() {
   };
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: "20px", maxWidth: "600px" }}>
+    <div
+      style={{ fontFamily: "sans-serif", padding: "20px", maxWidth: "600px" }}
+    >
       <h1>Trigger.dev Stream Stringify Example</h1>
       <p>
         This demonstrates the issue where <code>stream.append()</code> with an
@@ -114,7 +120,9 @@ function App() {
             style={{
               padding: "10px",
               margin: "5px 0",
-              backgroundColor: msg.message.includes("RAW") ? "#ffcccc" : "#f0f0f0",
+              backgroundColor: msg.message.includes("RAW")
+                ? "#ffcccc"
+                : "#f0f0f0",
               borderRadius: "4px",
             }}
           >

@@ -15,47 +15,99 @@ await messageStream.append(payload); // Results in "[Object object]"
 
 **Actual:** The stream contains `"[Object object]"`
 
-### Root Cause
+### Likely Root Cause
 
 `stream.append()` expects a `BodyInit` (string, Blob, etc.) at runtime, but the TypeScript types incorrectly suggest it accepts plain objects. When you pass an object, JavaScript calls `.toString()` on it, resulting in `"[Object object]"`.
 
 ### Workaround
 
+In the streaming job, stringify the json directly:
+
 ```typescript
-await messageStream.append(JSON.stringify(payload) as unknown as { message: string });
+await messageStream.append(
+  JSON.stringify(payload) as unknown as { message: string }
+);
 ```
+
+Then parse it in the `messageStream.read()` call.
 
 ## Steps to Reproduce
 
 1. **Clone and install dependencies:**
+
    ```bash
    pnpm install
    ```
 
-2. **Set up environment:**
+2. **Start the server**
+
    ```bash
-   cp .env.example .env
-   # Edit .env and add your TRIGGER_SECRET_KEY from https://cloud.trigger.dev
+   pnpm dev
    ```
 
-3. **Start the trigger dev server (terminal 1):**
-   ```bash
-   pnpm dev:trigger
-   ```
+3. **Open http://localhost:3000 and click "Start Stream"**
 
-4. **Start the backend server (terminal 2):**
-   ```bash
-   pnpm dev:backend
-   ```
+You should see the stream error, because the messages are not correctly being serialized or deserialized.
 
-5. **Start the frontend (terminal 3):**
-   ```bash
-   pnpm dev:frontend
-   ```
+4. Make the following changes:
 
-6. **Open http://localhost:3000 and click "Start Stream"**
+```typescript
+// Bug demonstration: typescript thinks chunk is an object, but it's actually
+// a string. Specifically not commenting in the next line, to demonstrate the bug.
+// const data = JSON.parse(chunk as unknown as string);
+// console.log("Parsed chunk:", data, "Type:", typeof data);
+// res.write(JSON.stringify(data) + "\n");
+res.write(JSON.stringify(chunk) + "\n");
+```
 
-You should see messages appear that show `RAW (not JSON): [Object object]` instead of the expected `{"message":"one"}`, `{"message":"two"}`, etc.
+To:
+
+```typescript
+// Bug demonstration: typescript thinks chunk is an object, but it's actually
+// a string. Specifically not commenting in the next line, to demonstrate the bug.
+const data = JSON.parse(chunk as unknown as string);
+console.log("Parsed chunk:", data, "Type:", typeof data);
+res.write(JSON.stringify(data) + "\n");
+// res.write(JSON.stringify(chunk) + "\n");
+```
+
+and:
+
+```typescript
+// BUG DEMONSTRATION:
+// The TypeScript types suggest we can pass an object directly to append(),
+// but at runtime this results in "[Object object]" because append() expects
+// a BodyInit (string, Blob, etc.) and JavaScript calls .toString() on objects.
+//
+// To fix this, you need to use JSON.stringify():
+//   await messageStream.append(JSON.stringify(payload) as unknown as { message: string });
+//
+// But we're NOT doing that here to demonstrate the bug:
+// await messageStream.append(payload);
+await messageStream.append(
+  JSON.stringify(payload) as unknown as { message: string }
+);
+```
+
+to:
+
+```typescript
+// BUG DEMONSTRATION:
+// The TypeScript types suggest we can pass an object directly to append(),
+// but at runtime this results in "[Object object]" because append() expects
+// a BodyInit (string, Blob, etc.) and JavaScript calls .toString() on objects.
+//
+// To fix this, you need to use JSON.stringify():
+//   await messageStream.append(JSON.stringify(payload) as unknown as { message: string });
+//
+// But we're NOT doing that here to demonstrate the bug:
+await messageStream.append(payload);
+// await messageStream.append(
+//   JSON.stringify(payload) as unknown as { message: string }
+// );
+```
+
+5. Reload the localhost:3000 page and observe the stream works as expected and displays the messages.
 
 ## Project Structure
 

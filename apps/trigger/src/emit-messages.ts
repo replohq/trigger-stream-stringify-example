@@ -46,7 +46,10 @@ export const emitMessages = task({
       //   await messageStream.append(JSON.stringify(payload) as unknown as { message: string });
       //
       // But we're NOT doing that here to demonstrate the bug:
-      await messageStream.append(payload);
+      // await messageStream.append(payload);
+      await messageStream.append(
+        JSON.stringify(payload) as unknown as { message: string }
+      );
 
       console.log(`Emitted: ${JSON.stringify(payload)}`);
 

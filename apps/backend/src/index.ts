@@ -18,7 +18,7 @@ app.post("/api/start-stream", async (_req, res) => {
 
     const handle = await tasks.trigger("emit-messages", {});
 
-    console.log(`Task triggered with run ID: ${handle.id}`);
+    console.log(`Task triggered with run ID: ${handle.id}`, handle);
     res.json({ runId: handle.id });
   } catch (error) {
     console.error("Error starting stream:", error);
@@ -47,8 +47,14 @@ app.get("/api/subscribe-stream/:runId", async (req, res) => {
     for await (const chunk of stream) {
       console.log("Received chunk:", chunk, "Type:", typeof chunk);
 
+      // Bug demonstration: typescript thinks chunk is an object, but it's actually
+      // a string. Specifically not commenting in the next line, to demonstrate the bug.
+      const data = JSON.parse(chunk as unknown as string);
+      console.log("Parsed chunk:", data, "Type:", typeof data);
+      res.write(JSON.stringify(data) + "\n");
+
       // Write each chunk as a newline-delimited JSON
-      res.write(JSON.stringify(chunk) + "\n");
+      // res.write(JSON.stringify(chunk) + "\n");
     }
 
     console.log("Stream finished");

@@ -5,10 +5,32 @@ const messageStream = streams.define<{ message: string }>({
   id: "message-stream",
 });
 
-const messages = ["one", "two", "three", "four", "five"];
+const messages = [
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
+  "twenty",
+];
 
 export const emitMessages = task({
   id: "emit-messages",
+  maxDuration: 120,
   run: async () => {
     console.log("Starting to emit messages...");
 

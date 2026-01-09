@@ -10,5 +10,6 @@ export default defineConfig({
       maxAttempts: 1,
     },
   },
+  maxDuration: 120,
   dirs: ["./src"],
 });
